@@ -115,7 +115,7 @@ module.exports.getVideoById = asyncHandler(async (req, res) => {
 
 module.exports.updateVideo = async (req, res) => {
     const { animeId, videoId } = req.params;
-    const { titleEpsideo, imageVideo, linkVideo, numberEpsideo, imageAnime } = req.body;
+    const { titleEpsideo, imageVideo, linkVideo, numberEpsideo } = req.body;
 
     try {
         // Find the anime document and update video info
@@ -134,7 +134,6 @@ module.exports.updateVideo = async (req, res) => {
 
         // Update the corresponding video info in anime
         const videoIndex = anime.epsideo.findIndex(v => v._id.toString() === videoId);
-        anime.epsideo[videoIndex].imageAnime = imageAnime || anime.epsideo[videoIndex].imageAnime;
         anime.epsideo[videoIndex].titleEpsideo = titleEpsideo || anime.epsideo[videoIndex].titleEpsideo;
         anime.epsideo[videoIndex].numberEpsideo = numberEpsideo || anime.epsideo[videoIndex].numberEpsideo;
         anime.epsideo[videoIndex].imageVideo = imageVideo || anime.epsideo[videoIndex].imageVideo;
