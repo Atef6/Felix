@@ -122,6 +122,7 @@ module.exports.updateAnime = asyncHandler(async (req, res) => {
             name: req.body.name,
             desc: req.body.desc,
             img: req.body.img,
+            poster:req.body.poster,
             trailer: req.body.trailer,
             year: req.body.year,
             genre: req.body.genre,
