@@ -16,7 +16,10 @@ const AnimeSchema = new mongoose.Schema({
     },
     img: {
         type: String,
-        required: true
+        required: true,
+    },
+    poster: {
+        type: String,
     },
     type: {
         type: String,
@@ -38,7 +41,7 @@ const AnimeSchema = new mongoose.Schema({
     },
     genre: {
         type: [String],
-        enum: ["أكشن", "رومانسي", "خيال", "دراما", "جريمة", "مغامرات", "إثارة", "خيال علمي", "موسيقى", "عائلي", "شونين", "خارق للطبيعة", "غيبلي", "غموض","مدرسي","سينين","كوميدي"],
+        enum: ["أكشن", "رومانسي", "خيال", "دراما", "جريمة", "مغامرات", "إثارة", "خيال علمي", "موسيقى", "عائلي", "شونين", "خارق للطبيعة", "غيبلي", "غموض", "مدرسي", "سينين", "كوميدي"],
         required: true,
     },
     rating: {
