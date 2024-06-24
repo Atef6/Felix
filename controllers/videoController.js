@@ -3,9 +3,6 @@ const mongoose = require('mongoose');
 const { Anime } = require('../modules/Anime')
 const Video = require('../modules/Video')
 const timeSince = require('../utils/timeSince');
-const ffmpeg = require('fluent-ffmpeg');
-const path = require('path');
-
 
 module.exports.downloadVideo = asyncHandler(async (req, res) => {
     const video = await Video.findById(req.params.id);
@@ -69,57 +66,21 @@ module.exports.mostView = asyncHandler(async (req, res) => {
     res.status(200).json(episodes)
 })
 
-// Helper function to convert .m3u8 to .mp4
-const convertM3U8toMP4 = async (inputPath, outputPath) => {
-    return new Promise((resolve, reject) => {
-        ffmpeg(inputPath)
-            .output(outputPath)
-            .on('end', () => resolve())
-            .on('error', (err) => reject(err))
-            .run();
-    });
-};
-
-// Add a new video, optionally converting .m3u8 to .mp4 before saving
 module.exports.addAllVideo = asyncHandler(async (req, res) => {
     const session = await Anime.startSession();
     session.startTransaction();
-
     try {
         const anime = await Anime.findById(req.params.animeId).session(session);
         if (!anime) {
-            return res.status(404).json({ msg: 'Anime not found' });
+            return res.status(404).json({ msg: 'Anime not Found' });
         }
 
-        // Create a new video instance
-        const newVideo = new Video({
-            titleEpsideo: req.body.titleEpsideo,
-            numberEpsideo: req.body.numberEpsideo,
-            imageVideo: req.body.imageVideo,
-            linkVideo: req.body.linkVideo,
-        });
-
-        // Check if the video link ends with .m3u8 for conversion
-        if (newVideo.linkVideo.endsWith('.m3u8')) {
-            const inputPath = newVideo.linkVideo;
-            const outputFileName = `${newVideo._id}.mp4`;
-            const outputFilePath = path.join(__dirname, '../uploads', outputFileName);
-
-            // Convert .m3u8 to .mp4
-            await convertM3U8toMP4(inputPath, outputFilePath);
-
-            // Update linkVideo to .mp4 file path
-            newVideo.linkVideo = outputFilePath;
-        }
-
-        // Push the new video to anime's epsideo array
+        const newVideo = new Video(req.body);
         anime.epsideo.push(newVideo);
 
-        // Save both anime and newVideo
         await Promise.all([anime.save(), newVideo.save()]);
         await session.commitTransaction();
 
-        // Prepare response data
         const videoData = newVideo.toObject();
         videoData.timeSinceCreated = timeSince(videoData.createdAt);
 
@@ -176,33 +137,17 @@ module.exports.updateVideo = async (req, res) => {
         anime.epsideo[videoIndex].titleEpsideo = titleEpsideo || anime.epsideo[videoIndex].titleEpsideo;
         anime.epsideo[videoIndex].numberEpsideo = numberEpsideo || anime.epsideo[videoIndex].numberEpsideo;
         anime.epsideo[videoIndex].imageVideo = imageVideo || anime.epsideo[videoIndex].imageVideo;
+        anime.epsideo[videoIndex].linkVideo = linkVideo || anime.epsideo[videoIndex].linkVideo;
 
-        // Check if linkVideo is updated and ends with .m3u8
-        if (linkVideo && linkVideo.endsWith('.m3u8')) {
-            const inputPath = linkVideo;
-            const outputFileName = `${videoId}.mp4`;
-            const outputFilePath = path.join(__dirname, '../uploads', outputFileName);
-
-            // Convert .m3u8 to .mp4
-            await convertM3U8toMP4(inputPath, outputFilePath);
-
-            // Update linkVideo to .mp4 file path
-            anime.epsideo[videoIndex].linkVideo = outputFilePath;
-            updatedVideo.linkVideo = outputFilePath; // Also update in Video document
-        } else {
-            anime.epsideo[videoIndex].linkVideo = linkVideo || anime.epsideo[videoIndex].linkVideo;
-            updatedVideo.linkVideo = linkVideo || updatedVideo.linkVideo; // Update in Video document
-        }
-
-        // Save the changes to both anime and updatedVideo
-        await Promise.all([anime.save(), updatedVideo.save()]);
+        // Save the changes to the anime document
+        await anime.save();
 
         return res.json({ success: true, message: "Video information updated successfully", data: anime.epsideo[videoIndex] });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-};
+}
 
 module.exports.deleteVideo = async (req, res) => {
     const { animeId, videoId } = req.params;
