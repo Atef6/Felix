@@ -16,7 +16,10 @@ const AnimeSchema = new mongoose.Schema({
     },
     img: {
         type: String,
-        required: true
+        required: true,
+    },
+    poster: {
+        type: String,
     },
     type: {
         type: String,
