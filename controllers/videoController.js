@@ -100,7 +100,7 @@ module.exports.getAllVideo = asyncHandler(async (req, res) => {
 
 module.exports.getRecentVideo = asyncHandler(async (req, res) => {
     const videos = await Video.find().sort({ createdAt: -1 }).limit(10);
-     // يجلب آخر 10 مقاطع فيديو مضافة
+    // يجلب آخر 10 مقاطع فيديو مضافة
     res.status(200).json(videos);
 });
 
