@@ -132,7 +132,8 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "node":"20.15.0"
   },
   "keywords": [],
   "author": "",
